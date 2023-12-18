@@ -1,0 +1,14 @@
+Server:
+  Port: "3002"
+  Debug: true
+  TimeZone: "Asia/Jakarta"
+
+Database:
+  Host: "127.0.0.1"
+  Port: "3306"
+  DBName: "coffee_service"
+  UserName: "root"
+  Password: "pwd"
+
+Authorization:
+  SecretKey: "my-secret-key"
