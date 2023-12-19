@@ -9,13 +9,18 @@ import (
 	"time"
 
 	"github.com/DoWithLogic/coffee-service/config"
-	"github.com/DoWithLogic/coffee-service/internal/users/delivery/http"
-	"github.com/DoWithLogic/coffee-service/internal/users/repository"
-	"github.com/DoWithLogic/coffee-service/internal/users/usecase"
 	"github.com/DoWithLogic/coffee-service/pkg/databases"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
+
+	httpProducts "github.com/DoWithLogic/coffee-service/internal/products/delivery/http"
+	repoProducts "github.com/DoWithLogic/coffee-service/internal/products/repository"
+	ucProducts "github.com/DoWithLogic/coffee-service/internal/products/usecase"
+
+	httpUsers "github.com/DoWithLogic/coffee-service/internal/users/delivery/http"
+	repoUsers "github.com/DoWithLogic/coffee-service/internal/users/repository"
+	ucUsers "github.com/DoWithLogic/coffee-service/internal/users/usecase"
 )
 
 func main() {
@@ -46,10 +51,17 @@ func main() {
 		return c.JSON(200, "welcome to coffe-service")
 	})
 
-	usersRepositories := repository.NewRepository(db)
-	usersUseCase := usecase.NewUsecase(usersRepositories, cfg)
-	handlers := http.NewHandlers(usersUseCase, cfg)
-	handlers.MapRoutes(version)
+	usersRepo := repoUsers.NewRepository(db)
+	productsRepo := repoProducts.NewRepository(db)
+
+	usersUC := ucUsers.NewUsecase(usersRepo, cfg)
+	productsUC := ucProducts.NewUseCase(productsRepo)
+
+	usersHandlers := httpUsers.NewHandlers(usersUC, cfg)
+	productsHandlers := httpProducts.NewHandlers(productsUC, cfg)
+
+	usersHandlers.MapRoutes(version)
+	productsHandlers.MapRoutes(version)
 
 	// Wait for interrupt signal to gracefully shutdown the server with a timeout of 10 seconds.
 	// Use a buffered channel to avoid missing signals as recommended for signal.Notify
