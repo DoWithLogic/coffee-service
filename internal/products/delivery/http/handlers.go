@@ -91,3 +91,74 @@ func (h *handler) ListMenuCategoryHandler(c echo.Context) error {
 
 	return response.SuccessBuilder(menuCategories).Send(c)
 }
+
+func (h *handler) NewMenuHandler(c echo.Context) error {
+	var request dtos.Menu
+	if err := c.Bind(&request); err != nil {
+		h.log.Err(err).Msg("[products][NewMenuHandler]Bind")
+
+		return response.ErrorBuilders(apperrors.ErrBadRequest).Send(c)
+	}
+
+	if err := request.Validate(); err != nil {
+		h.log.Err(err).Msg("[products][NewMenuHandler]Validate")
+
+		return response.ErrorBuilders(apperrors.ErrBadRequest).Send(c)
+	}
+
+	err := h.uc.CreateMenu(c.Request().Context(), &request)
+	if err != nil {
+		return response.ErrorBuilders(err).Send(c)
+	}
+
+	return response.SuccessBuilder(map[string]interface{}{"id": request.ID}).Send(c)
+}
+
+func (h *handler) DetailMenuHandler(c echo.Context) error {
+	var request struct {
+		MenuID int64 `param:"id"`
+	}
+	if err := c.Bind(&request); err != nil {
+		h.log.Err(err).Msg("[products][DetailMenuHandler]Bind")
+
+		return response.ErrorBuilders(apperrors.ErrBadRequest).Send(c)
+	}
+
+	menuCategoryData, err := h.uc.DetailMenu(c.Request().Context(), request.MenuID)
+	if err != nil {
+		return response.ErrorBuilders(err).Send(c)
+	}
+
+	return response.SuccessBuilder(menuCategoryData).Send(c)
+}
+
+func (h *handler) UpdateMenuHandler(c echo.Context) error {
+	var request dtos.UpdateMenu
+	if err := c.Bind(&request); err != nil {
+		h.log.Err(err).Msg("[products][UpdateMenuHandler]Bind")
+
+		return response.ErrorBuilders(apperrors.ErrBadRequest).Send(c)
+	}
+
+	if err := request.Validate(); err != nil {
+		h.log.Err(err).Msg("[products][UpdateMenuHandler]Validate")
+
+		return response.ErrorBuilders(apperrors.ErrBadRequest).Send(c)
+	}
+
+	err := h.uc.UpdateMenu(c.Request().Context(), request)
+	if err != nil {
+		return response.ErrorBuilders(err).Send(c)
+	}
+
+	return response.SuccessBuilder(nil).Send(c)
+}
+
+func (h *handler) ListMenuHandler(c echo.Context) error {
+	listMenuData, err := h.uc.ListMenu(c.Request().Context())
+	if err != nil {
+		return response.ErrorBuilders(err).Send(c)
+	}
+
+	return response.SuccessBuilder(listMenuData).Send(c)
+}

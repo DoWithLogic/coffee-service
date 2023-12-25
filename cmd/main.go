@@ -10,6 +10,7 @@ import (
 
 	"github.com/DoWithLogic/coffee-service/config"
 	"github.com/DoWithLogic/coffee-service/pkg/databases"
+	"github.com/DoWithLogic/coffee-service/pkg/observability"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
@@ -42,10 +43,11 @@ func main() {
 		panic(err)
 	}
 
-	server := echo.New()
+	var (
+		server  = echo.New()
+		version = server.Group("/v1/coffee")
+	)
 	server.Use(middleware.CORS())
-
-	version := server.Group("/v1/coffee")
 
 	version.GET("/ping", func(c echo.Context) error {
 		return c.JSON(200, "welcome to coffe-service")
@@ -53,9 +55,10 @@ func main() {
 
 	usersRepo := repoUsers.NewRepository(db)
 	productsRepo := repoProducts.NewRepository(db)
+	logger := observability.NewZeroLogHook().Z()
 
 	usersUC := ucUsers.NewUsecase(usersRepo, cfg)
-	productsUC := ucProducts.NewUseCase(productsRepo)
+	productsUC := ucProducts.NewUseCase(productsRepo, logger)
 
 	usersHandlers := httpUsers.NewHandlers(usersUC, cfg)
 	productsHandlers := httpProducts.NewHandlers(productsUC, cfg)
