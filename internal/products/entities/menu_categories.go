@@ -21,6 +21,10 @@ type UpdateMenuCategory struct {
 
 type MenuCategories []MenuCategory
 
+func (m *MenuCategory) IsNull() bool {
+	return m.ID == 0
+}
+
 func NewMenuCategory(req *dtos.MenuCategory) *MenuCategory {
 	return &MenuCategory{
 		ID:        req.ID,

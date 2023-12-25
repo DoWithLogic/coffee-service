@@ -146,4 +146,42 @@ func (r *repositoryTestSuite) Test_products_repositories() {
 	menuCategories, err := r.repo.MenuCategories(ctx)
 	r.Assert().NoError(err)
 	r.Assert().NotEmpty(menuCategories)
+
+	var argsInsertMenu = &entities.Menu{
+		MenuCategoriesID: argsInsert.ID,
+		Name:             "Kopi Susu Gula Aren",
+		Description:      "this product is combination between one shoot espresso and palm sugar",
+		Price:            25000,
+		CreatedAt:        time.Now(),
+	}
+
+	err = r.repo.InsertMenu(ctx, argsInsertMenu)
+	r.Assert().NoError(err)
+
+	detailMenu, err := r.repo.DetailMenu(ctx, argsInsertMenu.ID)
+	r.Assert().NoError(err)
+	r.Assert().Equal(argsInsertMenu.Name, detailMenu.Name)
+	r.Assert().Equal(argsInsertMenu.Description, detailMenu.Description)
+
+	var dateMenu = time.Now()
+
+	var argsUpdateMenu = entities.UpdateMenu{
+		ID:          argsInsertMenu.ID,
+		Name:        "Kopi Susu Gula Aren Strong",
+		Description: "this product is combination between two shoot espresso and palm sugar",
+		Price:       30000,
+		UpdatedAt:   &dateMenu,
+	}
+
+	err = r.repo.UpdateMenuByID(ctx, argsUpdateMenu)
+	r.Assert().NoError(err)
+
+	detailMenuAfterUpdate, err := r.repo.DetailMenu(ctx, argsInsertMenu.ID)
+	r.Assert().NoError(err)
+	r.Assert().Equal(argsUpdateMenu.Name, detailMenuAfterUpdate.Name)
+	r.Assert().Equal(argsUpdateMenu.Description, detailMenuAfterUpdate.Description)
+
+	listMenu, err := r.repo.ListMenu(ctx)
+	r.Assert().NoError(err)
+	r.Assert().NotEmpty(listMenu)
 }

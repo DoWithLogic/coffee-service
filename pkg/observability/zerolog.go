@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/rs/zerolog"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type (
@@ -20,10 +21,12 @@ type (
 type TracingHook struct{}
 
 func (h TracingHook) Run(e *zerolog.Event, level zerolog.Level, msg string) {
-	// ctx := e.GetCtx()
-	// span := trace.SpanContextFromContext(ctx)
+	ctx := e.GetCtx()
+	span := trace.SpanContextFromContext(ctx)
 
-	// e.Str("span_id", span.SpanID().String()).Str("trace_id", span.TraceID().String())
+	if span.HasSpanID() {
+		e.Str("span_id", span.SpanID().String()).Str("trace_id", span.TraceID().String())
+	}
 }
 
 func NewZeroLogHook() *Logger {
